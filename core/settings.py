@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "main.apps.MainConfig",
     "rest_framework",
     "drf_yasg",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -112,3 +113,9 @@ REST_FRAMEWORK = {
         'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
         'PAGE_SIZE': 10
         }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
