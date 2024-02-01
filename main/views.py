@@ -8,6 +8,7 @@ from rest_framework import status
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from rest_framework.authtoken.models import Token
 
 User = get_user_model()
 
@@ -39,3 +40,21 @@ class UserDetail(APIView):
 
         serializers = UserSerializer(user,context={"request":request})
         return Response(serializers.data,status=status.HTTP_200_OK)
+
+class RegisterUser(APIView):
+    def post(self,request:Request,format=None):
+
+        serializers = UserSerializer(data=request.data)
+
+        data = {}
+        if serializers.is_valid():
+            user =  serializers.save()
+            data["username"] = user.username
+            data["email"] = user.email
+            token = Token.objects.get(user=user).key
+            data["token"] = token
+        else:
+            data["error"] = "not authorised"
+        return Response(data)
+
+
