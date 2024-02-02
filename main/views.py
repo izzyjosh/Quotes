@@ -13,6 +13,8 @@ from .models import Note
 
 User = get_user_model()
 
+
+
 class UserList(APIView):
     permission_classes = [permissions.IsAdminUser]
 
@@ -28,12 +30,14 @@ class UserDetail(APIView):
 
     permission_classes = ([permissions.IsAuthenticated,permissions.IsAdminUser])
 
+
     def get_object(self,pk):
         try:
             user = get_object_or_404(User,pk=pk)
             return user
         except user.DoesNotExists:
             return HttpResponse(status="404 not found")
+
 
 
     def get(self,request:Request,pk,format=None):
@@ -44,6 +48,7 @@ class UserDetail(APIView):
         serializers = UserSerializer(user,context={"request":request})
         return Response(serializers.data,status=status.HTTP_200_OK)
 
+
     def put(self,request:Request,pk,format=None):
         user = self.get_object(pk)
         serializer = UserSerializer(user,request.data)
@@ -53,6 +58,8 @@ class UserDetail(APIView):
 
             return Response(serializer.data,status=status.HTTP_201__CREATED)
         return Response(serializer.error,status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class RegisterUser(APIView):
@@ -79,8 +86,13 @@ class RegisterUser(APIView):
         return Response(data)
 
 
+
+
 class NoteView(APIView):
+
     permission_classes = [permissions.IsAuthenticated]
+
+
     def get(self,request:Request,format=None):
         notes = Note.objects.all()
 
@@ -88,11 +100,38 @@ class NoteView(APIView):
 
         return Response(serializers.data,status=status.HTTP_200_OK)
 
+
+    def post(self,request:Request,format=None):
+
+        serializers = NoteSerializer(data=request.data,context={"request":request})
+        if serializers.is_valid():
+            serializers.save()
+
+            return Response(serializers.data,status=status.HTTP_200_OK)
+        return Response(serializers.error,status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 class NoteDetail(APIView):
+
 
     def get(self,request:Request,pk,format=None):
         note = Note.objects.get(pk=pk)
 
         serializers = NoteSerializer(note,context={"request":request})
         return Response(serializers.data,status=status.HTTP_200_OK)
+
+
+    def put(self,request:Request,pk,format=None):
+        note = Note.objects.get(pk=pk)
+
+        serializers = NoteSerializer(note,request.data,context={"request":request})
+
+        if serializers.is_valid():
+            serializers.save()
+
+            return Response(serializers.data,status=status.HTTP_200_OK)
+        return Response(serializers.error,status=status.HTTP_400_BAD_REQUEST)
+
 
