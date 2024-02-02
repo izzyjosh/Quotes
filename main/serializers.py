@@ -8,7 +8,7 @@ User = get_user_model()
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
 
-    password = serializers.CharField(min_length=8,read_only=True)
+    password = serializers.CharField(min_length=8,write_only=True)
 
     class Meta:
         model = User

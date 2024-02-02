@@ -27,19 +27,32 @@ class UserDetail(APIView):
 
     permission_classes = ([permissions.IsAuthenticated,permissions.IsAdminUser])
 
-    def get_user(self,pk):
+    def get_object(self,pk):
         try:
             user = get_object_or_404(User,pk=pk)
+            return user
         except user.DoesNotExists:
             return HttpResponse(status="404 not found")
 
 
     def get(self,request:Request,pk,format=None):
 
-        user = self.get_user(pk)
+        user = self.get_object(pk)
+        print(user)
 
         serializers = UserSerializer(user,context={"request":request})
         return Response(serializers.data,status=status.HTTP_200_OK)
+
+    def put(self,request:Request,pk,format=None):
+        user = self.get_object(pk)
+        serializer = UserSerializer(user,request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data,status=status.HTTP_201__CREATED)
+        return Response(serializer.error,status=status.HTTP_400_BAD_REQUEST)
+
 
 class RegisterUser(APIView):
     def post(self,request:Request,format=None):
