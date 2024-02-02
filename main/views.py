@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .serializers import UserSerializer
+from .serializers import UserSerializer,NoteSerializer
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import authentication,permissions
@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.authtoken.models import Token
+from .models import Note
 
 User = get_user_model()
 
@@ -77,4 +78,21 @@ class RegisterUser(APIView):
             data["error"] = "not authorised"
         return Response(data)
 
+
+class NoteView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self,request:Request,format=None):
+        notes = Note.objects.all()
+
+        serializers = NoteSerializer(notes,many=True,context={"request":request})
+
+        return Response(serializers.data,status=status.HTTP_200_OK)
+
+class NoteDetail(APIView):
+
+    def get(self,request:Request,pk,format=None):
+        note = Note.objects.get(pk=pk)
+
+        serializers = NoteSerializer(note,context={"request":request})
+        return Response(serializers.data,status=status.HTTP_200_OK)
 
