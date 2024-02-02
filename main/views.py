@@ -48,11 +48,18 @@ class RegisterUser(APIView):
 
         data = {}
         if serializers.is_valid():
-            user =  serializers.save()
+            user = serializers.save()
+
+            password = request.data.get("password")
+
             data["username"] = user.username
             data["email"] = user.email
             token = Token.objects.get(user=user).key
             data["token"] = token
+
+            current_user = get_object_or_404(User,email=user.email)
+            current_user.set_password(password)
+            current_user.save()
         else:
             data["error"] = "not authorised"
         return Response(data)
