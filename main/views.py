@@ -14,7 +14,7 @@ from .models import Note
 User = get_user_model()
 
 
-
+#can only be accessed by the admin user
 class UserList(APIView):
     permission_classes = [permissions.IsAdminUser]
 
@@ -25,7 +25,7 @@ class UserList(APIView):
 
         return Response(serializers.data,status=status.HTTP_200_OK)
 
-
+#also by only the admin user
 class UserDetail(APIView):
 
     permission_classes = ([permissions.IsAuthenticated,permissions.IsAdminUser])
@@ -61,7 +61,7 @@ class UserDetail(APIView):
 
 
 
-
+#endpoint for registering new users
 class RegisterUser(APIView):
     def post(self,request:Request,format=None):
 
@@ -87,14 +87,14 @@ class RegisterUser(APIView):
 
 
 
-
+#This should be the homepage where all notes are to be displayed with a form also for creating notes
 class NoteView(APIView):
 
     permission_classes = [permissions.IsAuthenticated]
 
 
     def get(self,request:Request,format=None):
-        notes = Note.objects.all()
+        notes = Note.objects.filter(user=request.user)
 
         serializers = NoteSerializer(notes,many=True,context={"request":request})
 
@@ -112,19 +112,19 @@ class NoteView(APIView):
 
 
 
-
+#for viewing a particular notes and also for updating and deleting that note 
 class NoteDetail(APIView):
 
 
     def get(self,request:Request,pk,format=None):
-        note = Note.objects.get(pk=pk)
+        note = get_object_or_404(Note,pk=pk)
 
         serializers = NoteSerializer(note,context={"request":request})
         return Response(serializers.data,status=status.HTTP_200_OK)
 
 
     def put(self,request:Request,pk,format=None):
-        note = Note.objects.get(pk=pk)
+        note = get_object_or_404(Note,pk=pk)
 
         serializers = NoteSerializer(note,request.data,context={"request":request})
 
@@ -135,3 +135,10 @@ class NoteDetail(APIView):
         return Response(serializers.error,status=status.HTTP_400_BAD_REQUEST)
 
 
+
+    def delete(self,request:Request,pk,format=None):
+        note = get_object_or_404(Note,pk=pk)
+
+        note.delete()
+        data = {"deleted":"Note deleted successfully"}
+        return Response(data,status=status.HTTP_204_NO_CONTENT)
