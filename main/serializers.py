@@ -24,7 +24,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 class NoteSerializer(serializers.HyperlinkedModelSerializer):
 
-    #note = serializers.HyperlinkedRelatedField(many=True,read_only=True)
+    audio_note = serializers.CharField(required=False)
+    video_note = serializers.CharField(required=False)
     class Meta:
         model = Note
         fields = ("url","title","audio_note","video_note","content","date")

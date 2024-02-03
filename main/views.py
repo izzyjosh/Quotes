@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.authtoken.models import Token
 from .models import Note
+from drf_yasg.utils import swagger_auto_schema
 
 User = get_user_model()
 
@@ -18,6 +19,7 @@ User = get_user_model()
 class UserList(APIView):
     permission_classes = [permissions.IsAdminUser]
 
+    @swagger_auto_schema(responses={200:UserSerializer(many=True)})
     def get(self,request:Request,format=None):
         users = User.objects.all()
 
@@ -38,8 +40,7 @@ class UserDetail(APIView):
         except user.DoesNotExists:
             return HttpResponse(status="404 not found")
 
-
-
+    @swagger_auto_schema(responses={200:UserSerializer(many=True)}    )
     def get(self,request:Request,pk,format=None):
 
         user = self.get_object(pk)
@@ -48,7 +49,7 @@ class UserDetail(APIView):
         serializers = UserSerializer(user,context={"request":request})
         return Response(serializers.data,status=status.HTTP_200_OK)
 
-
+    @swagger_auto_schema(request_body=UserSerializer)
     def put(self,request:Request,pk,format=None):
         user = self.get_object(pk)
         serializer = UserSerializer(user,request.data)
@@ -63,6 +64,8 @@ class UserDetail(APIView):
 
 #endpoint for registering new users
 class RegisterUser(APIView):
+
+    @swagger_auto_schema(request_body=UserSerializer)
     def post(self,request:Request,format=None):
 
         serializers = UserSerializer(data=request.data)
@@ -93,14 +96,14 @@ class NoteView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
 
+    @swagger_auto_schema(responses={200:NoteSerializer(many=True)}    )
     def get(self,request:Request,format=None):
         notes = Note.objects.filter(user=request.user)
 
         serializers = NoteSerializer(notes,many=True,context={"request":request})
 
         return Response(serializers.data,status=status.HTTP_200_OK)
-
-
+    @swagger_auto_schema(request_body=NoteSerializer)
     def post(self,request:Request,format=None):
 
         serializers = NoteSerializer(data=request.data,context={"request":request})
@@ -115,14 +118,14 @@ class NoteView(APIView):
 #for viewing a particular notes and also for updating and deleting that note 
 class NoteDetail(APIView):
 
-
+    @swagger_auto_schema(responses={200:NoteSerializer(many=True)}    )
     def get(self,request:Request,pk,format=None):
         note = get_object_or_404(Note,pk=pk)
 
         serializers = NoteSerializer(note,context={"request":request})
         return Response(serializers.data,status=status.HTTP_200_OK)
 
-
+    @swagger_auto_schema(request_body=NoteSerializer)
     def put(self,request:Request,pk,format=None):
         note = get_object_or_404(Note,pk=pk)
 
@@ -134,8 +137,7 @@ class NoteDetail(APIView):
             return Response(serializers.data,status=status.HTTP_200_OK)
         return Response(serializers.error,status=status.HTTP_400_BAD_REQUEST)
 
-
-
+    @swagger_auto_schema(request_body=NoteSerializer)
     def delete(self,request:Request,pk,format=None):
         note = get_object_or_404(Note,pk=pk)
 
